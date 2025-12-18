@@ -1826,6 +1826,13 @@ namespace nodetool
           server.m_seed_nodes.push_back(MONERO_UNWRAP(net::get_network_address(full_addr, default_port)));
         }
         MDEBUG("Number of seed nodes: " << server.m_seed_nodes.size());
+        
+        // OXYRA: If no seed nodes configured, don't spam connection attempts
+        if (server.m_seed_nodes.empty())
+        {
+          MINFO("No seed nodes configured - use --add-peer to connect to other OXYRA nodes");
+          return true;
+        }
       }
 
       if (server.m_seed_nodes.empty() || m_offline || !m_exclusive_peers.empty())
@@ -2109,54 +2116,7 @@ namespace nodetool
   template<class t_payload_net_handler>
   bool node_server<t_payload_net_handler>::update_dns_blocklist()
   {
-    if (!m_enable_dns_blocklist)
-      return true;
-    if (m_nettype != cryptonote::MAINNET)
-      return true;
-
-    static const std::vector<std::string> dns_urls = {
-      "blocklist.moneropulse.se"
-    , "blocklist.moneropulse.org"
-    , "blocklist.moneropulse.net"
-    , "blocklist.moneropulse.no"
-    , "blocklist.moneropulse.fr"
-    , "blocklist.moneropulse.de"
-    , "blocklist.moneropulse.ch"
-    };
-
-    std::vector<std::string> records;
-    if (!tools::dns_utils::load_txt_records_from_dns(records, dns_urls))
-      return true;
-
-    unsigned good = 0, bad = 0;
-    for (const auto& record : records)
-    {
-      std::vector<std::string> ips;
-      boost::split(ips, record, boost::is_any_of(";"));
-      for (const auto &ip: ips)
-      {
-        if (ip.empty())
-          continue;
-        auto subnet = net::get_ipv4_subnet_address(ip);
-        if (subnet)
-        {
-          block_subnet(*subnet, DNS_BLOCKLIST_LIFETIME);
-          ++good;
-          continue;
-        }
-        const expect<epee::net_utils::network_address> parsed_addr = net::get_network_address(ip, 0);
-        if (parsed_addr)
-        {
-          block_host(*parsed_addr, DNS_BLOCKLIST_LIFETIME, true);
-          ++good;
-          continue;
-        }
-        MWARNING("Invalid IP address or subnet from DNS blocklist: " << ip << " - " << parsed_addr.error());
-        ++bad;
-      }
-    }
-    if (good > 0)
-      MINFO(good << " addresses added to the blocklist");
+    // OXYRA: DNS blocklist disabled - no Monero infrastructure available
     return true;
   }
   //-----------------------------------------------------------------------------------
