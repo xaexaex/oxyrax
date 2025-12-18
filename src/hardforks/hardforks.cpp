@@ -32,7 +32,8 @@
 #define MONERO_DEFAULT_LOG_CATEGORY "blockchain.hardforks"
 
 const hardfork_t mainnet_hard_forks[] = {
-  // Oxyra: Start RandomX (v12) from block 1
+  // Oxyra: Allow v1 for genesis block (height 0), then start RandomX (v12) from block 1
+  { 1, 0, 0, 1341378000 },
   { 12, 1, 0, 1341378000 },
 };
 const size_t num_mainnet_hard_forks = sizeof(mainnet_hard_forks) / sizeof(mainnet_hard_forks[0]);

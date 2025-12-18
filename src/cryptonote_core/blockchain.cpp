@@ -1297,7 +1297,8 @@ bool Blockchain::prevalidate_miner_transaction(const block& b, uint64_t height, 
   LOG_PRINT_L3("Blockchain::" << __func__);
   CHECK_AND_ASSERT_MES(b.miner_tx.vin.size() == 1, false, "coinbase transaction in the block has no inputs");
   CHECK_AND_ASSERT_MES(b.miner_tx.vin[0].type() == typeid(txin_gen), false, "coinbase transaction in the block has the wrong type");
-  CHECK_AND_ASSERT_MES(b.miner_tx.version > 1 || hf_version < HF_VERSION_MIN_V2_COINBASE_TX, false, "Invalid coinbase transaction version");
+  // Allow version 1 for genesis block (height 0), otherwise enforce version 2 for HF12+
+  CHECK_AND_ASSERT_MES(height == 0 || b.miner_tx.version > 1 || hf_version < HF_VERSION_MIN_V2_COINBASE_TX, false, "Invalid coinbase transaction version");
 
   // for v2 txes (ringct), we only accept empty rct signatures for miner transactions,
   if (hf_version >= HF_VERSION_REJECT_SIGS_IN_COINBASE && b.miner_tx.version >= 2)
@@ -1360,6 +1361,15 @@ bool Blockchain::validate_miner_transaction(const block& b, size_t cumulative_bl
     MERROR_VER("block weight " << cumulative_block_weight << " is bigger than allowed for this blockchain");
     return false;
   }
+  
+  // Oxyra: Allow 90 million OXRX premine (3%) in genesis block
+  // Get height from miner transaction input
+  uint64_t block_height = boost::get<txin_gen>(b.miner_tx.vin[0]).height;
+  if (block_height == 0)
+  {
+    base_reward = PREMINE_AMOUNT; // 90 million OXRX premine for genesis block
+  }
+  
   if(base_reward + fee < money_in_use)
   {
     MERROR_VER("coinbase transaction spend too much money (" << print_money(money_in_use) << "). Block reward is " << print_money(base_reward + fee) << "(" << print_money(base_reward) << "+" << print_money(fee) << "), cumulative_block_weight " << cumulative_block_weight);
@@ -4477,6 +4487,10 @@ uint64_t Blockchain::get_next_long_term_block_weight(uint64_t block_weight) cons
   if (hf_version < HF_VERSION_LONG_TERM_BLOCK_WEIGHT)
     return block_weight;
 
+  // Handle genesis block case when db_height is 0
+  if (nblocks == 0)
+    return block_weight;
+
   uint64_t long_term_median = get_long_term_block_weight_median(db_height - nblocks, nblocks);
   uint64_t long_term_effective_median_block_weight = std::max<uint64_t>(CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5, long_term_median);
 
@@ -4517,7 +4531,13 @@ bool Blockchain::update_next_cumulative_weight_limit(uint64_t *long_term_effecti
   else
   {
     const uint64_t nblocks = std::min<uint64_t>(m_long_term_block_weights_window, db_height);
-    const uint64_t long_term_median = get_long_term_block_weight_median(db_height - nblocks, nblocks);
+    uint64_t long_term_median;
+    
+    // Handle genesis block case when db_height is 0
+    if (nblocks == 0)
+      long_term_median = CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5;
+    else
+      long_term_median = get_long_term_block_weight_median(db_height - nblocks, nblocks);
 
     m_long_term_effective_median_block_weight = std::max<uint64_t>(CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V5, long_term_median);
 

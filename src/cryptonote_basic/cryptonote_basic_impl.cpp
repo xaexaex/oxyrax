@@ -81,33 +81,87 @@ namespace cryptonote {
   }
   //-----------------------------------------------------------------------------------------------
   bool get_block_reward(size_t median_weight, size_t current_block_weight, uint64_t already_generated_coins, uint64_t &reward, uint8_t version) {
-    // Oxyra: Zero block rewards for all blocks EXCEPT genesis
-    // Genesis block needs to match the hardcoded genesis TX amount (17.592186044415 XMR for testnet)
-    // All subsequent blocks: miners only receive transaction fees, no block subsidy
+    // Oxyra 3-Phase Emission Curve
+    // Phase 1 (Blocks 1-500,000): High rewards for early adoption - 50 OXRX/block
+    // Phase 2 (Blocks 500,001-2,000,000): Balanced rewards - 20 OXRX/block  
+    // Phase 3 (Blocks 2,000,001+): Tail emission - 0.3 OXRX/block
     
-    // Genesis block: Return hardcoded amount that matches genesis TX
+    // Calculate base reward
+    uint64_t base_reward = 0;
+    
+    // Determine current block height from already_generated_coins
+    // Approximate height calculation for phase determination
+    uint64_t estimated_height = 0;
+    
     if (already_generated_coins == 0) {
-      // Testnet genesis has 17592186044415 atomic units (17.592186044415 XMR)
-      // This matches Monero's original testnet genesis transaction
-      reward = 17592186044415;
-      return true;
+      // Genesis block - no PoW reward (premine only)
+      estimated_height = 0;
+    } else if (already_generated_coins < PREMINE_AMOUNT) {
+      // Should never happen, but handle edge case
+      estimated_height = 0;
+    } else {
+      // Estimate height based on coins generated minus premine
+      // This is approximate but sufficient for phase determination
+      uint64_t pow_generated = already_generated_coins - PREMINE_AMOUNT;
+      
+      // Phase 1: 50 OXRX * 500,000 blocks = 25,000,000 OXRX
+      const uint64_t PHASE1_TOTAL = (uint64_t)2500000000000000; // 25M OXRX
+      const uint64_t PHASE1_BLOCKS = 500000;
+      
+      // Phase 2: 20 OXRX * 1,500,000 blocks = 30,000,000 OXRX  
+      const uint64_t PHASE2_TOTAL = (uint64_t)3000000000000000; // 30M OXRX
+      const uint64_t PHASE2_BLOCKS = 1500000;
+      
+      if (pow_generated < PHASE1_TOTAL) {
+        // In Phase 1
+        estimated_height = 1 + (pow_generated / (50 * COIN));
+      } else if (pow_generated < (PHASE1_TOTAL + PHASE2_TOTAL)) {
+        // In Phase 2
+        estimated_height = PHASE1_BLOCKS + 1 + ((pow_generated - PHASE1_TOTAL) / (20 * COIN));
+      } else {
+        // In Phase 3
+        estimated_height = PHASE1_BLOCKS + PHASE2_BLOCKS + 1;
+      }
     }
     
-    // All non-genesis blocks: ZERO reward (miners get only transaction fees)
-    reward = 0;
+    // Assign reward based on estimated height
+    if (estimated_height == 0) {
+      // Genesis block: no PoW reward (premine handled separately)
+      base_reward = 0;
+    } else if (estimated_height <= 500000) {
+      // Phase 1: High rewards
+      base_reward = 50 * COIN; // 50 OXRX per block
+    } else if (estimated_height <= 2000000) {
+      // Phase 2: Balanced rewards
+      base_reward = 20 * COIN; // 20 OXRX per block
+    } else {
+      // Phase 3: Tail emission
+      base_reward = FINAL_SUBSIDY_PER_MINUTE; // 0.3 OXRX per block
+    }
     
-    // Still validate block weight to prevent spam
+    // Apply block weight penalty if block is too large
     uint64_t full_reward_zone = get_min_block_weight(version);
     size_t median_weight_check = median_weight;
     if (median_weight_check < full_reward_zone) {
       median_weight_check = full_reward_zone;
     }
     
+    // Block too large - reject
     if(current_block_weight > 2 * median_weight_check) {
       MERROR("Block cumulative weight is too big: " << current_block_weight << ", expected less than " << 2 * median_weight_check);
       return false;
     }
     
+    // Apply penalty for blocks larger than median
+    if (current_block_weight > median_weight_check) {
+      uint64_t penalty_factor = (current_block_weight - median_weight_check);
+      uint64_t penalty_divisor = (2 * median_weight_check - current_block_weight);
+      if (penalty_divisor > 0) {
+        base_reward = (base_reward * penalty_divisor) / (2 * median_weight_check);
+      }
+    }
+    
+    reward = base_reward;
     return true;
   }
   //------------------------------------------------------------------------------------

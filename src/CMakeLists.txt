@@ -112,6 +112,19 @@ if(NOT IOS)
   add_subdirectory(daemonizer)
   add_subdirectory(daemon)
   add_subdirectory(blockchain_utilities)
+  
+  # Genesis transaction generator for Oxyra
+  add_executable(gen_genesis_tx gen_genesis_tx.cpp)
+  target_link_libraries(gen_genesis_tx
+    PRIVATE
+      cryptonote_basic
+      cryptonote_core
+      common
+      epee
+      ${Boost_LIBRARIES}
+  )
+  set_property(TARGET gen_genesis_tx PROPERTY OUTPUT_NAME "gen_genesis_tx")
+  install(TARGETS gen_genesis_tx DESTINATION bin)
 endif()
 
 if(BUILD_DEBUG_UTILITIES)

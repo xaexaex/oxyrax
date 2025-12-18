@@ -51,10 +51,11 @@
 #define BLOCKCHAIN_TIMESTAMP_CHECK_WINDOW               60
 
 // MONEY_SUPPLY - total number coins to be generated
-// Oxyra: 3 billion premine, no additional emission
-#define MONEY_SUPPLY                                    ((uint64_t)3000000000000000000000) // 3 billion OXRX with 12 decimals
-#define EMISSION_SPEED_FACTOR_PER_MINUTE                (20)
-#define FINAL_SUBSIDY_PER_MINUTE                        ((uint64_t)0) // No block rewards after premine
+// Oxyra: 90 million premine (3%), 2.91 billion via mining
+#define MONEY_SUPPLY                                    ((uint64_t)300000000000000000) // 3 billion OXRX with 8 decimals
+#define PREMINE_AMOUNT                                  ((uint64_t)9000000000000000)   // 90 million OXRX (3% premine)
+#define EMISSION_SPEED_FACTOR_PER_MINUTE                (21)
+#define FINAL_SUBSIDY_PER_MINUTE                        ((uint64_t)30000000) // 0.3 OXRX tail emission
 
 #define CRYPTONOTE_REWARD_BLOCKS_WINDOW                 100
 #define CRYPTONOTE_BLOCK_GRANTED_FULL_REWARD_ZONE_V2    60000 //size of block (bytes) after which reward for block calculated using block size
@@ -63,9 +64,9 @@
 #define CRYPTONOTE_LONG_TERM_BLOCK_WEIGHT_WINDOW_SIZE   100000 // size in blocks of the long term block weight median window
 #define CRYPTONOTE_SHORT_TERM_BLOCK_WEIGHT_SURGE_FACTOR 50
 #define CRYPTONOTE_COINBASE_BLOB_RESERVED_SIZE          600
-#define CRYPTONOTE_DISPLAY_DECIMAL_POINT                12
+#define CRYPTONOTE_DISPLAY_DECIMAL_POINT                8
 // COIN - number of smallest units in one coin
-#define COIN                                            ((uint64_t)1000000000000) // pow(10, 12)
+#define COIN                                            ((uint64_t)100000000) // pow(10, 8)
 
 #define FEE_PER_KB_OLD                                  ((uint64_t)10000000000) // pow(10, 10)
 #define FEE_PER_KB                                      ((uint64_t)2000000000) // 2 * pow(10, 9)
@@ -234,7 +235,7 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x01, 0x4e, 0x45, 0x54, 0x57, 0x4f, 0x52, 0x4b, 0x01
     } }; // OXYRAX NETWORK - Unique Oxyra network ID
-  std::string const GENESIS_TX = "013c01ff0001ffffffffffff03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017767aafcde9be00dcfd098715ebcf7f410daebc582fda69d24a28e9d0bc890d1";
+  std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
   uint32_t const GENESIS_NONCE = 10000;
 
   // Hash domain separators
@@ -277,7 +278,7 @@ namespace config
     boost::uuids::uuid const NETWORK_ID = { {
         0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x02, 0x54, 0x45, 0x53, 0x54, 0x4e, 0x45, 0x54, 0x02
       } }; // OXYRAX TESTNET
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff03029b2e4c0281c0b02e7c53291a94d1d0cbff8883f8024f5142ee494ffbbd08807121017767aafcde9be00dcfd098715ebcf7f410daebc582fda69d24a28e9d0bc890d1";
+    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
     uint32_t const GENESIS_NONCE = 10001;
   }
 
@@ -292,7 +293,7 @@ namespace config
     boost::uuids::uuid const NETWORK_ID = { {
         0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x03, 0x53, 0x54, 0x41, 0x47, 0x45, 0x4e, 0x45, 0x54
       } }; // OXYRAX STAGENET
-    std::string const GENESIS_TX = "013c01ff0001ffffffffffff0302df5d56da0c7d643ddd1ce61901c7bdc5fb1738bfe39fbe69c28a3a7032729c0f2101168d0c4ca86fb55a4cf6a36d31431be1c53a3bd7411bb24e8832410289fa6f3b";
+    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
     uint32_t const GENESIS_NONCE = 10002;
   }
 }

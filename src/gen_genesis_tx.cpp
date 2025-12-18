@@ -10,6 +10,8 @@
 #include "cryptonote_basic/account.h"
 #include "serialization/binary_utils.h"
 #include "string_tools.h"
+#include "crypto/crypto.h"
+#include "device/device_default.hpp"
 
 using namespace cryptonote;
 
@@ -17,41 +19,55 @@ using namespace cryptonote;
 // Note: This creates a miner transaction (coinbase) with the premine amount
 bool generate_oxyra_genesis_tx(std::string& tx_hex, const std::string& premine_address_str) {
     try {
-        // Parse the premine address
+        // Parse the premine address  
         cryptonote::address_parse_info info;
         if (!cryptonote::get_account_address_from_str(info, cryptonote::MAINNET, premine_address_str)) {
             std::cerr << "Failed to parse address: " << premine_address_str << std::endl;
             return false;
         }
         
-        // Create genesis miner transaction
+        // Create genesis miner transaction using the proper construct_miner_tx function
         transaction tx;
-        tx.version = 2; // RCT transaction
-        tx.unlock_time = 0;
+        const uint64_t premine_amount = PREMINE_AMOUNT; // 90 million OXRX (3% premine)
+        
+        // For genesis block (height 0), we create a simple miner transaction
+        // Genesis blocks typically have version 1
+        tx.version = 1;
+        tx.unlock_time = CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW; // 60 blocks
         
         // Create the miner input (coinbase)
         txin_gen in;
         in.height = 0; // Genesis block
         tx.vin.push_back(in);
         
-        // Create output with 3 billion OXRX premine
-        const uint64_t premine_amount = 3000000000ULL * COIN; // 3 billion with 12 decimals
+        // Generate transaction keypair
+        keypair txkey = keypair::generate(hw::get_device("default"));
+        add_tx_pub_key_to_extra(tx, txkey.pub);
         
-        crypto::public_key out_eph_public_key = AUTO_VAL_INIT(out_eph_public_key);
+        // Create output with proper key derivation
         crypto::key_derivation derivation = AUTO_VAL_INIT(derivation);
+        crypto::public_key out_eph_public_key = AUTO_VAL_INIT(out_eph_public_key);
         
-        // Simple output - in production you'd want proper key derivation
+        bool r = crypto::generate_key_derivation(info.address.m_view_public_key, txkey.sec, derivation);
+        if (!r) {
+            std::cerr << "Failed to generate key derivation" << std::endl;
+            return false;
+        }
+        
+        r = crypto::derive_public_key(derivation, 0, info.address.m_spend_public_key, out_eph_public_key);
+        if (!r) {
+            std::cerr << "Failed to derive public key" << std::endl;
+            return false;
+        }
+        
         tx_out out;
         out.amount = premine_amount;
         
         txout_to_key tk;
-        tk.key = info.address.m_spend_public_key; // Simplified - proper version needs key derivation
+        tk.key = out_eph_public_key;
         out.target = tk;
         
         tx.vout.push_back(out);
-        
-        // Add minimal extra data
-        tx.extra.clear();
         
         // Serialize to hex
         std::string tx_blob = t_serializable_object_to_blob(tx);
