@@ -245,57 +245,8 @@ namespace cryptonote
 
   bool checkpoints::load_checkpoints_from_dns(network_type nettype)
   {
-    std::vector<std::string> records;
-
-    // All four MoneroPulse domains have DNSSEC on and valid
-    static const std::vector<std::string> dns_urls = { "checkpoints.moneropulse.se"
-						     , "checkpoints.moneropulse.org"
-						     , "checkpoints.moneropulse.net"
-						     , "checkpoints.moneropulse.co"
-    };
-
-    static const std::vector<std::string> testnet_dns_urls = { "testpoints.moneropulse.se"
-							     , "testpoints.moneropulse.org"
-							     , "testpoints.moneropulse.net"
-							     , "testpoints.moneropulse.co"
-    };
-
-    static const std::vector<std::string> stagenet_dns_urls = { "stagenetpoints.moneropulse.se"
-                   , "stagenetpoints.moneropulse.org"
-                   , "stagenetpoints.moneropulse.net"
-                   , "stagenetpoints.moneropulse.co"
-    };
-
-    if (!tools::dns_utils::load_txt_records_from_dns(records, nettype == TESTNET ? testnet_dns_urls : nettype == STAGENET ? stagenet_dns_urls : dns_urls))
-      return true; // why true ?
-
-    for (const auto& record : records)
-    {
-      auto pos = record.find(":");
-      if (pos != std::string::npos)
-      {
-        uint64_t height;
-        crypto::hash hash;
-
-        // parse the first part as uint64_t,
-        // if this fails move on to the next record
-        std::stringstream ss(record.substr(0, pos));
-        if (!(ss >> height))
-        {
-    continue;
-        }
-
-        // parse the second part as crypto::hash,
-        // if this fails move on to the next record
-        std::string hashStr = record.substr(pos + 1);
-        if (!epee::string_tools::hex_to_pod(hashStr, hash))
-        {
-    continue;
-        }
-
-        ADD_CHECKPOINT(height, hashStr);
-      }
-    }
+    // OXYRA: Disable DNS checkpoint fetching from MoneroPulse servers
+    // Return true to indicate successful (but empty) load
     return true;
   }
 

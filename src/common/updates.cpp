@@ -39,24 +39,10 @@ namespace tools
 {
   bool check_updates(const std::string &software, const std::string &buildtag, std::string &version, std::string &hash)
   {
-    std::vector<std::string> records;
-    bool found = false;
-
-    MDEBUG("Checking updates for " << buildtag << " " << software);
-
-    // All four MoneroPulse domains have DNSSEC on and valid
-    static const std::vector<std::string> dns_urls = {
-        "updates.moneropulse.org",
-        "updates.moneropulse.net",
-        "updates.moneropulse.fr",
-        "updates.moneropulse.de",
-        "updates.moneropulse.no",
-        "updates.moneropulse.ch",
-        "updates.moneropulse.se"
-    };
-
-    if (!tools::dns_utils::load_txt_records_from_dns(records, dns_urls))
-      return false;
+    // OXYRA: Disable update checking from MoneroPulse DNS servers
+    // Always return false to indicate no updates available
+    return false;
+  }
 
     for (const auto& record : records)
     {
