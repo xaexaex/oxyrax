@@ -1952,9 +1952,13 @@ namespace nodetool
 
       if (start_conn_count == get_outgoing_connections_count(zone.second) && start_conn_count < zone.second.m_config.m_net_config.max_out_connection_count)
       {
-        MINFO("Failed to connect to any, trying seeds");
-        if (!connect_to_seed(zone.first))
-          continue;
+        // OXYRA: Only attempt seed connection if seeds are configured
+        if (!zone.second.m_seed_nodes.empty())
+        {
+          MINFO("Failed to connect to any, trying seeds");
+          if (!connect_to_seed(zone.first))
+            continue;
+        }
       }
       one_succeeded = true;
     }
