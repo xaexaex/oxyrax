@@ -108,7 +108,13 @@ namespace cryptonote
     bool get_payload_sync_data(CORE_SYNC_DATA& hshd);
     bool on_callback(cryptonote_connection_context& context);
     t_core& get_core(){return m_core;}
-    virtual bool is_synchronized() const final { return !no_sync() && m_synchronized; }
+    // OXYRA: Consider synchronized if no_sync is disabled AND (we're actually synchronized OR there are no connections to sync from)
+    virtual bool is_synchronized() const final { 
+      if (no_sync()) return false;
+      if (m_synchronized) return true;
+      // If no synchronized connections, consider ourselves synchronized (standalone mode)
+      return m_syncronized_connections_count == 0;
+    }
     void log_connections();
     std::list<connection_info> get_connections();
     const block_queue &get_block_queue() const { return m_block_queue; }

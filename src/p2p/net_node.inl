@@ -1902,6 +1902,15 @@ namespace nodetool
     for(auto& zone : m_network_zones)
     {
       size_t start_conn_count = get_outgoing_connections_count(zone.second);
+      
+      // OXYRA: If no peers and no seeds configured, skip this zone entirely to avoid spam
+      if(!zone.second.m_peerlist.get_white_peers_count() && 
+         !zone.second.m_peerlist.get_gray_peers_count() && 
+         zone.second.m_seed_nodes.empty())
+      {
+        continue;
+      }
+      
       if(!zone.second.m_peerlist.get_white_peers_count() && !connect_to_seed(zone.first))
       {
         continue;
