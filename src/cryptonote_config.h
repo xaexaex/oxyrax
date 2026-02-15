@@ -235,7 +235,7 @@ namespace config
   boost::uuids::uuid const NETWORK_ID = { {
       0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x01, 0x4e, 0x45, 0x54, 0x57, 0x4f, 0x52, 0x4b, 0x01
     } }; // OXYRAX NETWORK - Unique Oxyra network ID
-  std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
+  std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0241c8156d980e5acc5ad69c7fbeade4feb49b42ae43d98e7dd3772d347ed1b8472101546adc58180a16704433036dfe9c5d545f4422c964bf9253dfc60a0e842c01c2";
   uint32_t const GENESIS_NONCE = 10000;
 
   // Hash domain separators
@@ -278,7 +278,7 @@ namespace config
     boost::uuids::uuid const NETWORK_ID = { {
         0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x02, 0x54, 0x45, 0x53, 0x54, 0x4e, 0x45, 0x54, 0x02
       } }; // OXYRAX TESTNET
-    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
+    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0241c8156d980e5acc5ad69c7fbeade4feb49b42ae43d98e7dd3772d347ed1b8472101546adc58180a16704433036dfe9c5d545f4422c964bf9253dfc60a0e842c01c2";
     uint32_t const GENESIS_NONCE = 10001;
   }
 
@@ -293,7 +293,7 @@ namespace config
     boost::uuids::uuid const NETWORK_ID = { {
         0x4f, 0x58, 0x59, 0x52, 0x41, 0x58, 0x00, 0x03, 0x53, 0x54, 0x41, 0x47, 0x45, 0x4e, 0x45, 0x54
       } }; // OXYRAX STAGENET
-    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0236274443c94ff2d0bd51b8c779896c9db8b2efecd306b232701c99923518a55a21017cfceb72bc8fab794ffed6633d8aa1f9a05bbdf7ec7f21a9afe74ba71ff035aa";
+    std::string const GENESIS_TX = "013c01ff00018080ead7bcaefe0f0241c8156d980e5acc5ad69c7fbeade4feb49b42ae43d98e7dd3772d347ed1b8472101546adc58180a16704433036dfe9c5d545f4422c964bf9253dfc60a0e842c01c2";
     uint32_t const GENESIS_NONCE = 10002;
   }
 }
